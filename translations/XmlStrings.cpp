@@ -19,13 +19,13 @@
  */
 
 #include <QCoreApplication>
-#include <QStringList>
-#include <QFile>
+#include <QDebug>
+#include <QDomAttr>
 #include <QDomDocument>
 #include <QDomNode>
-#include <QDomAttr>
+#include <QFile>
+#include <QStringList>
 #include <QTextStream>
-#include <QDebug>
 
 
 namespace
@@ -40,8 +40,8 @@ void parseElement( const QDomElement& node )
 	QDomNamedNodeMap attrNodes = node.attributes();
 	for ( int i = 0; i < attrNodes.count(); i++ )
 	{
-		QDomAttr attr = attrNodes.item(i).toAttr();
-		if ( attr.name().at(0) == '_' )
+                QDomAttr attr = attrNodes.item( i ).toAttr();
+                if ( attr.name().at( 0 ) == '_' )
 		{
 			if ( !stringList.contains( attr.value() ) )
 			{
@@ -62,7 +62,7 @@ void parseFile( const QString& filename )
 {
 	QFile file( filename );
 
-	if ( file.open( QFile::ReadOnly|QFile::Text ) )
+        if ( file.open( QFile::ReadOnly | QFile::Text ) )
 	{
 		QDomDocument doc;
 
@@ -76,12 +76,12 @@ void parseFile( const QString& filename )
 }
 
 
-int main( int argc, char *argv[] )
+int main( int argc, char* argv[] )
 {
 	QCoreApplication app( argc, argv );
 
 	QStringList filenameList = app.arguments();
-	filenameList.removeFirst();  // Remove 0th argument, which is the command name
+        filenameList.removeFirst(); // Remove 0th argument, which is the command name
 
 	foreach ( QString filename, filenameList )
 	{
@@ -92,17 +92,17 @@ int main( int argc, char *argv[] )
 
 	QTextStream out( stdout );
 
-	out << "// Automatically generated with " << app.arguments().at(0) << Qt::endl;
-	out << "//" << Qt::endl;
-	out << "// Sources:" << Qt::endl;
+        out << "// Automatically generated with " << app.arguments().at( 0 ) << endl;
+        out << "//" << endl;
+        out << "// Sources:" << endl;
 	foreach ( QString filename, filenameList )
 	{
-		out << "//         " << filename << Qt::endl;
+                out << "//         " << filename << endl;
 	}
-	out << "//" << Qt::endl;
-		
+        out << "//" << endl;
+
 	foreach ( QString string, stringList )
 	{
-		out << "QT_TRANSLATE_NOOP( \"XmlStrings\", \"" << string << "\" );" << Qt::endl;
+                out << "QT_TRANSLATE_NOOP( \"XmlStrings\", \"" << string << "\" );" << endl;
 	}
 }

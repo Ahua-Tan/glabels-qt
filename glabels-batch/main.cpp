@@ -18,8 +18,8 @@
  *  along with gLabels-qt.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "model/FileUtil.h"
 #include "model/Db.h"
+#include "model/FileUtil.h"
 #include "model/Model.h"
 #include "model/PageRenderer.h"
 #include "model/Settings.h"
@@ -41,11 +41,11 @@
 
 namespace
 {
-	
-#if defined(Q_OS_WIN)
+
+#if defined( Q_OS_WIN )
 	const QString STDOUT_FILENAME = "CON:";
 	const QString STDIN_FILENAME  = "CON:";
-#elif defined(Q_OS_LINUX)
+#elif defined( Q_OS_LINUX )
 	const QString STDOUT_FILENAME = "/dev/stdout";
 	const QString STDIN_FILENAME  = "/dev/stdin";
 #else
@@ -53,7 +53,7 @@ namespace
 	const QString STDIN_FILENAME  = "/dev/stdin";
 #endif
 
-}
+} // namespace
 
 
 int main( int argc, char **argv )
@@ -69,25 +69,29 @@ int main( int argc, char **argv )
 	// Setup translators
 	//
 	QLocale locale = QLocale::system();
-	QString qtTranslationsDir = QLibraryInfo::path( QLibraryInfo::TranslationsPath );
+#if QT_VERSION >= QT_VERSION_CHECK( 6, 0, 0 )
+        QString qtTranslationsDir = QLibraryInfo::path( QLibraryInfo::TranslationsPath );
+#else
+        QString qtTranslationsDir = QLibraryInfo::location( QLibraryInfo::TranslationsPath );
+#endif
 	QString myTranslationsDir = glabels::model::FileUtil::translationsDir().canonicalPath();
-	
+
 	QTranslator qtTranslator;
 	if ( qtTranslator.load( locale, "qt", "_", qtTranslationsDir ) )
 	{
-		app.installTranslator(&qtTranslator);
+                app.installTranslator( &qtTranslator );
 	}
 
 	QTranslator glabelsTranslator;
 	if ( glabelsTranslator.load( locale, "glabels", "_", myTranslationsDir ) )
 	{
-		app.installTranslator(&glabelsTranslator);
+                app.installTranslator( &glabelsTranslator );
 	}
 
 	QTranslator templatesTranslator;
 	if ( templatesTranslator.load( locale, "templates", "_", myTranslationsDir ) )
 	{
-		app.installTranslator(&templatesTranslator);
+                app.installTranslator( &templatesTranslator );
 	}
 
 
@@ -95,65 +99,68 @@ int main( int argc, char **argv )
 	// Parse command line
 	//
 	const QList<QCommandLineOption> options = {
-		{{"p","printer"},
-		 QString( QCoreApplication::translate( "main", "Send output to <printer>. (Default=\"%1\")") ).arg( QPrinterInfo::defaultPrinterName() ),
-		 QCoreApplication::translate( "main", "printer" ),
-		 QPrinterInfo::defaultPrinterName() },
-		
-		{{"o","output"},
-		 QCoreApplication::translate( "main", "Set output filename to <filename>. Set to \"-\" for stdout. (Default=\"output.pdf\")" ),
-		 QCoreApplication::translate( "main", "filename" ),
-		 "output.pdf" },
-		
-		{{"s","sheets"},
-		 QCoreApplication::translate( "main", "Set number of sheets to <n>. (Default=1)" ),
-		 "n", "1" },
+                { { "p", "printer" },
+                  QString( QCoreApplication::translate( "main",
+                                                        "Send output to <printer>. (Default=\"%1\")" ) )
+                          .arg( QPrinterInfo::defaultPrinterName() ),
+                  QCoreApplication::translate( "main", "printer" ),
+                  QPrinterInfo::defaultPrinterName() },
 
-		{{"c","copies"},
-		 QCoreApplication::translate( "main", "Set number of copies to <n>. (Default=1)" ),
-		 "n", "1" },
-		
-		{{"a","collate"},
-		 QCoreApplication::translate( "main", "Collate merge copies." ) },
-		
-		{{"g","group"},
-		 QCoreApplication::translate( "main", "Start each merge group on a new page." ) },
-		
-		{{"f","first"},
-		 QCoreApplication::translate( "main", "Set starting position to <n>. (Default=1)" ),
-		 "n", "1" },
+                { { "o", "output" },
+                  QCoreApplication::translate( "main",
+                                               "Set output filename to <filename>. Set to \"-\" for stdout. "
+                                               "(Default=\"output.pdf\")" ),
+                  QCoreApplication::translate( "main", "filename" ),
+                  "output.pdf" },
 
-		{{"l","outlines"},
-		 QCoreApplication::translate( "main", "Print label outlines." ) },
-		
-		{{"m","crop-marks"},
-		 QCoreApplication::translate( "main", "Print crop marks." ) },
-		
-		{{"r","reverse"},
-		 QCoreApplication::translate( "main", "Print in reverse (mirror image)." ) },
+                { { "s", "sheets" },
+                  QCoreApplication::translate( "main", "Set number of sheets to <n>. (Default=1)" ),
+                  "n",
+                  "1" },
 
-		{{"D","define"},
-		 QCoreApplication::translate( "main", "Set user variable <var> to <value>" ),
-		 QCoreApplication::translate( "main", "var>=<value" ) }
-	};
+                { { "c", "copies" },
+                  QCoreApplication::translate( "main", "Set number of copies to <n>. (Default=1)" ),
+                  "n",
+                  "1" },
+
+                { { "a", "collate" }, QCoreApplication::translate( "main", "Collate merge copies." ) },
+
+                { { "g", "group" },
+                  QCoreApplication::translate( "main", "Start each merge group on a new page." ) },
+
+                { { "f", "first" },
+                  QCoreApplication::translate( "main", "Set starting position to <n>. (Default=1)" ),
+                  "n",
+                  "1" },
+
+                { { "l", "outlines" }, QCoreApplication::translate( "main", "Print label outlines." ) },
+
+                { { "m", "crop-marks" }, QCoreApplication::translate( "main", "Print crop marks." ) },
+
+                { { "r", "reverse" },
+                  QCoreApplication::translate( "main", "Print in reverse (mirror image)." ) },
+
+                { { "D", "define" },
+                  QCoreApplication::translate( "main", "Set user variable <var> to <value>" ),
+                  QCoreApplication::translate( "main", "var>=<value" ) } };
 
 
 	QCommandLineParser parser;
-	parser.setApplicationDescription( QCoreApplication::translate( "main", "gLabels Label Designer (Batch Front-end)" ) );
+        parser.setApplicationDescription(
+                QCoreApplication::translate( "main", "gLabels Label Designer (Batch Front-end)" ) );
 	parser.addOptions( options );
 	parser.addHelpOption();
 	parser.addVersionOption();
-	parser.addPositionalArgument( "file",
-	                              QCoreApplication::translate( "main", "gLabels project file to print." ),
-	                              "file" );
+        parser.addPositionalArgument(
+                "file", QCoreApplication::translate( "main", "gLabels project file to print." ), "file" );
 	parser.process( app );
 
 	//
 	// Parse variable definitions from command line, if any
 	//
-	QMap<QString,QString> variableDefinitions;
-	
-	for ( QString definition : parser.values("define") )
+        QMap<QString, QString> variableDefinitions;
+
+        for ( QString definition : parser.values( "define" ) )
 	{
 		QStringList parts = definition.split( '=' );
 		if ( parts.size() != 2 )
@@ -162,7 +169,7 @@ int main( int argc, char **argv )
 			return -1;
 		}
 
-		variableDefinitions[ parts[0] ] = parts[1];
+                variableDefinitions[parts[0]] = parts[1];
 	}
 
 	//
@@ -173,7 +180,7 @@ int main( int argc, char **argv )
 	glabels::merge::Factory::init();
 	glabels::barcode::Backends::init();
 
-	
+
 	if ( parser.positionalArguments().size() == 1 )
 	{
 		qDebug() << "Batch mode.";
@@ -192,14 +199,14 @@ int main( int argc, char **argv )
 
 			QPrinter printer( QPrinter::HighResolution );
 			printer.setColorMode( QPrinter::Color );
-			if ( parser.isSet("printer") )
+                        if ( parser.isSet( "printer" ) )
 			{
-				qDebug() << "Printer =" << parser.value("printer");
-				printer.setPrinterName( parser.value("printer") );
+                                qDebug() << "Printer =" << parser.value( "printer" );
+                                printer.setPrinterName( parser.value( "printer" ) );
 			}
-			else if ( parser.isSet("output") )
+                        else if ( parser.isSet( "output" ) )
 			{
-				QString outputFilename = parser.value("output");
+                                QString outputFilename = parser.value( "output" );
 				if ( outputFilename == "-" )
 				{
 					outputFilename = STDOUT_FILENAME;
@@ -219,7 +226,8 @@ int main( int argc, char **argv )
 				if ( parser.isSet( "sheets" ) )
 				{
 					// Full sheets of simple items
-					renderer.setNCopies( parser.value( "sheets" ).toInt() * model->frame()->nLabels() );
+                                        renderer.setNCopies( parser.value( "sheets" ).toInt() *
+                                                             model->frame()->nLabels() );
 					renderer.setStartItem( 0 );
 				}
 				else if ( parser.isSet( "copies" ) )
@@ -252,16 +260,17 @@ int main( int argc, char **argv )
 			{
 				if ( renderer.nItems() == 1 )
 				{
-					qDebug() <<  "Printing 1 item on 1 page.";
+                                        qDebug() << "Printing 1 item on 1 page.";
 				}
 				else
 				{
-					qDebug() <<  "Printing" << renderer.nItems() << "items on 1 page.";
+                                        qDebug() << "Printing" << renderer.nItems() << "items on 1 page.";
 				}
 			}
 			else
 			{
-				qDebug() << "Printing" << renderer.nItems() << "items on" << renderer.nPages() << "pages.";
+                                qDebug() << "Printing" << renderer.nItems() << "items on" << renderer.nPages()
+                                         << "pages.";
 			}
 
 			// Do it!
@@ -280,6 +289,6 @@ int main( int argc, char **argv )
 		}
 		return -1;
 	}
-		
+
 	return 0;
 }

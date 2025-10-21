@@ -86,7 +86,11 @@ set (Model_qobject_headers
   Variables.h
 )
 
-qt6_wrap_cpp (Model_moc_sources ${Model_qobject_headers})
+if(QT_VERSION_MAJOR EQUAL 6)
+    qt6_wrap_cpp(Model_moc_sources ${Model_qobject_headers})
+else()
+    qt5_wrap_cpp(Model_moc_sources ${Model_qobject_headers})
+endif()
 
 #=====================================
 # Target
@@ -108,10 +112,10 @@ target_include_directories (Model
 target_link_libraries (Model
   Barcode
   Merge
-  Qt6::Core
-  Qt6::PrintSupport
-  Qt6::Xml
-  Qt6::Svg
+  Qt${QT_VERSION_MAJOR}::Core
+  Qt${QT_VERSION_MAJOR}::PrintSupport
+  Qt${QT_VERSION_MAJOR}::Xml
+  Qt${QT_VERSION_MAJOR}::Svg
   ${OPTIONAL_ZLIB}
 )
 

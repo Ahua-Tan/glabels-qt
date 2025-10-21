@@ -9,26 +9,42 @@ include (TRANSLATION_FILES.txt)
 #
 # Update strings in C-locale translation files (lupdate+lrelease)
 #
-qt6_create_translation (glabels_C_qm_file
-  ${CMAKE_SOURCE_DIR}/glabels
-  ${CMAKE_SOURCE_DIR}/model
-  ${CMAKE_SOURCE_DIR}/backends
-  glabels_C.ts
-  OPTIONS -no-obsolete -locations none
-)
-qt6_create_translation (templates_C_qm_file
-  ${CMAKE_CURRENT_BINARY_DIR}/template-strings.h
-  templates_C.ts
-  OPTIONS -no-obsolete -locations none
-)
-
-#
-# Generate QM files from all other language translation files (lrelease only)
-#
-qt6_add_translation (language_qm_files
-  ${GLABELS_TS_FILES}
-  ${TEMPLATES_TS_FILES}
-)
+# 创建翻译文件
+if(QT_VERSION_MAJOR EQUAL 6)
+    qt6_create_translation(glabels_C_qm_file
+        ${CMAKE_SOURCE_DIR}/glabels
+        ${CMAKE_SOURCE_DIR}/model
+        ${CMAKE_SOURCE_DIR}/backends
+        glabels_C.ts
+        OPTIONS -no-obsolete -locations none
+    )
+    qt6_create_translation(templates_C_qm_file
+        ${CMAKE_CURRENT_BINARY_DIR}/template-strings.h
+        templates_C.ts
+        OPTIONS -no-obsolete -locations none
+    )
+    qt6_add_translation(language_qm_files
+        ${GLABELS_TS_FILES}
+        ${TEMPLATES_TS_FILES}
+    )
+else()
+    qt5_create_translation(glabels_C_qm_file
+        ${CMAKE_SOURCE_DIR}/glabels
+        ${CMAKE_SOURCE_DIR}/model
+        ${CMAKE_SOURCE_DIR}/backends
+        glabels_C.ts
+        OPTIONS -no-obsolete -locations none
+    )
+    qt5_create_translation(templates_C_qm_file
+        ${CMAKE_CURRENT_BINARY_DIR}/template-strings.h
+        templates_C.ts
+        OPTIONS -no-obsolete -locations none
+    )
+    qt5_add_translation(language_qm_files
+        ${GLABELS_TS_FILES}
+        ${TEMPLATES_TS_FILES}
+    )
+endif()
 
 add_custom_target (update_translations
   DEPENDS ${glabels_C_qm_file} ${templates_C_qm_file} ${language_qm_files}
@@ -50,8 +66,8 @@ target_compile_features (Model
 )
 
 target_link_libraries (XmlStrings
-  Qt6::Core
-  Qt6::Xml
+  Qt${QT_VERSION_MAJOR}::Core
+  Qt${QT_VERSION_MAJOR}::Xml
 )
 
 #=======================================

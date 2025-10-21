@@ -20,8 +20,8 @@
 
 #include "MainWindow.h"
 
-#include "model/FileUtil.h"
 #include "model/Db.h"
+#include "model/FileUtil.h"
 #include "model/Model.h"
 #include "model/Settings.h"
 #include "model/Version.h"
@@ -53,26 +53,26 @@ int main( int argc, char **argv )
 	//
 	// Setup translators
 	//
-	QLocale locale = QLocale::system();
-	QString qtTranslationsDir = QLibraryInfo::path( QLibraryInfo::TranslationsPath );
+        QLocale locale            = QLocale::system();
+        QString qtTranslationsDir = QLibraryInfo::location( QLibraryInfo::TranslationsPath );
 	QString myTranslationsDir = glabels::model::FileUtil::translationsDir().canonicalPath();
-	
+
 	QTranslator qtTranslator;
 	if ( qtTranslator.load( locale, "qt", "_", qtTranslationsDir ) )
 	{
-		app.installTranslator(&qtTranslator);
+                app.installTranslator( &qtTranslator );
 	}
 
 	QTranslator glabelsTranslator;
 	if ( glabelsTranslator.load( locale, "glabels", "_", myTranslationsDir ) )
 	{
-		app.installTranslator(&glabelsTranslator);
+                app.installTranslator( &glabelsTranslator );
 	}
 
 	QTranslator templatesTranslator;
 	if ( templatesTranslator.load( locale, "templates", "_", myTranslationsDir ) )
 	{
-		app.installTranslator(&templatesTranslator);
+                app.installTranslator( &templatesTranslator );
 	}
 
 
@@ -83,11 +83,12 @@ int main( int argc, char **argv )
 	parser.setApplicationDescription( QCoreApplication::translate( "main", "gLabels Label Designer" ) );
 	parser.addHelpOption();
 	parser.addVersionOption();
-	parser.addPositionalArgument( "files",
-	                              QCoreApplication::translate( "main", "gLabels project files to open, optionally." ),
-	                              "[files...]" );
+        parser.addPositionalArgument(
+                "files",
+                QCoreApplication::translate( "main", "gLabels project files to open, optionally." ),
+                "[files...]" );
 	parser.process( app );
-	
+
 	//
 	// Initialize subsystems
 	//
@@ -96,7 +97,7 @@ int main( int argc, char **argv )
 	glabels::merge::Factory::init();
 	glabels::barcode::Backends::init();
 
-	
+
 	//
 	// Open each file in its own main window
 	//
@@ -114,7 +115,7 @@ int main( int argc, char **argv )
 		}
 	}
 
-	
+
 	//
 	// Launch main window
 	//
@@ -124,6 +125,6 @@ int main( int argc, char **argv )
 		mainWindow->show();
 	}
 
-	
+
 	return app.exec();
 }

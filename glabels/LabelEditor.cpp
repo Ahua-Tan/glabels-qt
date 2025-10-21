@@ -27,21 +27,21 @@
 #include "model/FrameEllipse.h"
 #include "model/FrameRect.h"
 #include "model/FrameRound.h"
+#include "model/Markup.h"
 #include "model/Model.h"
-#include "model/ModelObject.h"
 #include "model/ModelBarcodeObject.h"
 #include "model/ModelBoxObject.h"
 #include "model/ModelEllipseObject.h"
 #include "model/ModelImageObject.h"
 #include "model/ModelLineObject.h"
+#include "model/ModelObject.h"
 #include "model/ModelTextObject.h"
-#include "model/Markup.h"
 #include "model/Settings.h"
 
 #include <QMimeData>
 #include <QMouseEvent>
-#include <QtMath>
 #include <QtDebug>
+#include <QtMath>
 
 
 namespace glabels
@@ -52,46 +52,46 @@ namespace glabels
 	//
 	namespace
 	{
-		const int     nZoomLevels = 11;
-		const double  zoomLevels[nZoomLevels] = { 8, 6, 4, 3, 2, 1.5, 1, 0.75, 0.67, 0.50, 0.33 };
+                const int    nZoomLevels             = 11;
+                const double zoomLevels[nZoomLevels] = { 8, 6, 4, 3, 2, 1.5, 1, 0.75, 0.67, 0.50, 0.33 };
 
-		const double  ZOOM_TO_FIT_PAD = 16.0;
+                const double ZOOM_TO_FIT_PAD = 16.0;
 
-		const QColor  backgroundColor( 192, 192, 192 );
+                const QColor backgroundColor( 192, 192, 192 );
 
-		const QColor  shadowColor( 64, 64, 64, 128 );
-		const double  shadowOffsetPixels = 4;
+                const QColor shadowColor( 64, 64, 64, 128 );
+                const double shadowOffsetPixels = 4;
 
-		const QColor  labelColor( 255, 255, 255 );
-		const QColor  labelOutlineColor( 0, 0, 0 );
-		const double  labelOutlineWidthPixels = 1;
+                const QColor labelColor( 255, 255, 255 );
+                const QColor labelOutlineColor( 0, 0, 0 );
+                const double labelOutlineWidthPixels = 1;
 
-		const QColor  gridLineColor( 192, 192, 192 );
-		const double  gridLineWidthPixels = 1;
+                const QColor gridLineColor( 192, 192, 192 );
+                const double gridLineWidthPixels = 1;
 
-		const QColor  markupLineColor( 240, 99, 99 );
-		const double  markupLineWidthPixels = 1;
+                const QColor markupLineColor( 240, 99, 99 );
+                const double markupLineWidthPixels = 1;
 
-		const QColor  selectRegionFillColor( 192, 192, 255, 128 );
-		const QColor  selectRegionOutlineColor( 0, 0, 255, 128 );
-		const double  selectRegionOutlineWidthPixels = 3;
-	}
+                const QColor selectRegionFillColor( 192, 192, 255, 128 );
+                const QColor selectRegionOutlineColor( 0, 0, 255, 128 );
+                const double selectRegionOutlineWidthPixels = 3;
+        } // namespace
 
 
 	///
 	/// Constructor
 	///
 	LabelEditor::LabelEditor( QScrollArea* scrollArea, QWidget* parent )
-		: QWidget(parent), mScrollArea(scrollArea)
+                : QWidget( parent ), mScrollArea( scrollArea )
 	{
-		mModel              = nullptr;
-		mUndoRedoModel      = nullptr;
+                mModel         = nullptr;
+                mUndoRedoModel = nullptr;
 
-		mZoom               = 1;
-		mZoomToFitFlag      = false;
-		mScale              = 1;
-		mMarkupVisible      = true;
-		mGridVisible        = true;
+                mZoom          = 1;
+                mZoomToFitFlag = false;
+                mScale         = 1;
+                mMarkupVisible = true;
+                mGridVisible   = true;
 
 		mState = IdleState;
 
@@ -103,10 +103,11 @@ namespace glabels
 		mCreateObject        = nullptr;
 
 		setMouseTracking( true );
-		setFocusPolicy(Qt::StrongFocus);
+                setFocusPolicy( Qt::StrongFocus );
 		setAcceptDrops( true );
 
-		connect( model::Settings::instance(), SIGNAL(changed()), this, SLOT(onSettingsChanged()) );
+                connect(
+                        model::Settings::instance(), SIGNAL( changed() ), this, SLOT( onSettingsChanged() ) );
 		onSettingsChanged();
 	}
 
@@ -114,8 +115,7 @@ namespace glabels
 	///
 	/// Zoom property
 	///
-	double
-	LabelEditor::zoom() const
+        double LabelEditor::zoom() const
 	{
 		return mZoom;
 	}
@@ -124,8 +124,7 @@ namespace glabels
 	///
 	/// Markup visible? property
 	///
-	bool
-	LabelEditor::markupVisible() const
+        bool LabelEditor::markupVisible() const
 	{
 		return mMarkupVisible;
 	}
@@ -134,8 +133,7 @@ namespace glabels
 	///
 	/// Grid visible? property
 	///
-	bool
-	LabelEditor::qridVisible() const
+        bool LabelEditor::qridVisible() const
 	{
 		return mGridVisible;
 	}
@@ -144,19 +142,18 @@ namespace glabels
 	///
 	/// Model Parameter Setter
 	///
-	void
-	LabelEditor::setModel( model::Model* model, UndoRedoModel* undoRedoModel )
+        void LabelEditor::setModel( model::Model* model, UndoRedoModel* undoRedoModel )
 	{
-		mModel = model;
+                mModel         = model;
 		mUndoRedoModel = undoRedoModel;
 
 		if ( model )
 		{
 			zoomToFit();
 
-			connect( model, SIGNAL(changed()), this, SLOT(update()) );
-			connect( model, SIGNAL(selectionChanged()), this, SLOT(update()) );
-			connect( model, SIGNAL(sizeChanged()), this, SLOT(onModelSizeChanged()) );
+                        connect( model, SIGNAL( changed() ), this, SLOT( update() ) );
+                        connect( model, SIGNAL( selectionChanged() ), this, SLOT( update() ) );
+                        connect( model, SIGNAL( sizeChanged() ), this, SLOT( onModelSizeChanged() ) );
 
 			update();
 		}
@@ -166,8 +163,7 @@ namespace glabels
 	///
 	/// Grid Visibility Parameter Setter
 	///
-	void
-	LabelEditor::setGridVisible( bool visibleFlag )
+        void LabelEditor::setGridVisible( bool visibleFlag )
 	{
 		mGridVisible = visibleFlag;
 		update();
@@ -177,8 +173,7 @@ namespace glabels
 	///
 	/// Markup Visibility Parameter Setter
 	///
-	void
-	LabelEditor::setMarkupVisible( bool visibleFlag )
+        void LabelEditor::setMarkupVisible( bool visibleFlag )
 	{
 		mMarkupVisible = visibleFlag;
 		update();
@@ -188,12 +183,11 @@ namespace glabels
 	///
 	/// Zoom In "One Notch"
 	///
-	void
-	LabelEditor::zoomIn()
+        void LabelEditor::zoomIn()
 	{
 		// Find closest standard zoom level to our current zoom
 		// Start with 2nd largest scale
-		int i_min = 1;
+                int    i_min    = 1;
 		double dist_min = qFabs( zoomLevels[1] - mZoom );
 
 		for ( int i = 2; i < nZoomLevels; i++ )
@@ -201,47 +195,45 @@ namespace glabels
 			double dist = qFabs( zoomLevels[i] - mZoom );
 			if ( dist < dist_min )
 			{
-				i_min = i;
+                                i_min    = i;
 				dist_min = dist;
 			}
 		}
 
 		// Zoom in one notch
-		setZoomReal( zoomLevels[i_min-1], false );
+                setZoomReal( zoomLevels[i_min - 1], false );
 	}
 
 
 	///
 	/// Zoom Out "One Notch"
 	///
-	void
-	LabelEditor::zoomOut()
+        void LabelEditor::zoomOut()
 	{
 		// Find closest standard zoom level to our current zoom
 		// Start with largest scale, end on 2nd smallest
-		int i_min = 0;
+                int    i_min    = 0;
 		double dist_min = qFabs( zoomLevels[0] - mZoom );
 
-		for ( int i = 1; i < (nZoomLevels-1); i++ )
+                for ( int i = 1; i < ( nZoomLevels - 1 ); i++ )
 		{
 			double dist = qFabs( zoomLevels[i] - mZoom );
 			if ( dist < dist_min )
 			{
-				i_min = i;
+                                i_min    = i;
 				dist_min = dist;
 			}
 		}
 
 		// Zoom out one notch
-		setZoomReal( zoomLevels[i_min+1], false );
+                setZoomReal( zoomLevels[i_min + 1], false );
 	}
 
 
 	///
 	/// Zoom To 1:1 Scale
 	///
-	void
-	LabelEditor::zoom1To1()
+        void LabelEditor::zoom1To1()
 	{
 		setZoomReal( 1.0, false );
 	}
@@ -250,19 +242,18 @@ namespace glabels
 	///
 	/// Zoom To Fit
 	///
-	void
-	LabelEditor::zoomToFit()
+        void LabelEditor::zoomToFit()
 	{
 		double wPixels = mScrollArea->maximumViewportSize().width();
 		double hPixels = mScrollArea->maximumViewportSize().height();
-	
+
 		double x_scale = ( wPixels - ZOOM_TO_FIT_PAD ) / mModel->w().pt();
 		double y_scale = ( hPixels - ZOOM_TO_FIT_PAD ) / mModel->h().pt();
 		double newZoom = qMin( x_scale, y_scale ) * model::PTS_PER_INCH / physicalDpiX();
 
 		// Limits
 		newZoom = qMin( newZoom, zoomLevels[0] );
-		newZoom = qMax( newZoom, zoomLevels[nZoomLevels-1] );
+                newZoom = qMax( newZoom, zoomLevels[nZoomLevels - 1] );
 
 		setZoomReal( newZoom, true );
 	}
@@ -271,8 +262,7 @@ namespace glabels
 	///
 	/// Is Zoom at Maximum?
 	///
-	bool
-	LabelEditor::isZoomMax() const
+        bool LabelEditor::isZoomMax() const
 	{
 		return mZoom >= zoomLevels[0];
 	}
@@ -281,18 +271,16 @@ namespace glabels
 	///
 	/// Is Zoom at Minimum?
 	///
-	bool
-	LabelEditor::isZoomMin() const
+        bool LabelEditor::isZoomMin() const
 	{
-		return mZoom <= zoomLevels[nZoomLevels-1];
+                return mZoom <= zoomLevels[nZoomLevels - 1];
 	}
 
 
 	///
 	/// Set Zoom to Value
 	///
-	void
-	LabelEditor::setZoomReal( double zoom, bool zoomToFitFlag )
+        void LabelEditor::setZoomReal( double zoom, bool zoomToFitFlag )
 	{
 		mZoom          = zoom;
 		mZoomToFitFlag = zoomToFitFlag;
@@ -300,12 +288,12 @@ namespace glabels
 		/* Actual scale depends on DPI of display (assume DpiX == DpiY). */
 		mScale = zoom * physicalDpiX() / model::PTS_PER_INCH;
 
-		setMinimumSize( mScale*mModel->w().pt() + ZOOM_TO_FIT_PAD,
-		                mScale*mModel->h().pt() + ZOOM_TO_FIT_PAD );
+                setMinimumSize( mScale * mModel->w().pt() + ZOOM_TO_FIT_PAD,
+                                mScale * mModel->h().pt() + ZOOM_TO_FIT_PAD );
 
 		/* Adjust origin to center label in widget. */
-		mX0 = (width()/mScale - mModel->w()) / 2;
-		mY0 = (height()/mScale - mModel->h()) / 2;
+                mX0 = ( width() / mScale - mModel->w() ) / 2;
+                mY0 = ( height() / mScale - mModel->h() ) / 2;
 
 		update();
 
@@ -316,8 +304,7 @@ namespace glabels
 	///
 	/// Arrow mode (normal mode)
 	///
-	void
-	LabelEditor::arrowMode()
+        void LabelEditor::arrowMode()
 	{
 		setCursor( Qt::ArrowCursor );
 
@@ -328,86 +315,79 @@ namespace glabels
 	///
 	/// Create box mode
 	///
-	void
-	LabelEditor::createBoxMode()
+        void LabelEditor::createBoxMode()
 	{
 		setCursor( Cursors::Box() );
 
 		mCreateObjectType = Box;
-		mState = CreateIdle;
+                mState            = CreateIdle;
 	}
 
 
 	///
 	/// Create ellipse mode
 	///
-	void
-	LabelEditor::createEllipseMode()
+        void LabelEditor::createEllipseMode()
 	{
 		setCursor( Cursors::Ellipse() );
 
 		mCreateObjectType = Ellipse;
-		mState = CreateIdle;
+                mState            = CreateIdle;
 	}
 
 
 	///
 	/// Create image mode
 	///
-	void
-	LabelEditor::createImageMode()
+        void LabelEditor::createImageMode()
 	{
 		setCursor( Cursors::Image() );
 
 		mCreateObjectType = Image;
-		mState = CreateIdle;
+                mState            = CreateIdle;
 	}
 
 
 	///
 	/// Create line mode
 	///
-	void
-	LabelEditor::createLineMode()
+        void LabelEditor::createLineMode()
 	{
 		setCursor( Cursors::Line() );
 
 		mCreateObjectType = Line;
-		mState = CreateIdle;
+                mState            = CreateIdle;
 	}
 
 
 	///
 	/// Create text mode
 	///
-	void
-	LabelEditor::createTextMode()
+        void LabelEditor::createTextMode()
 	{
 		setCursor( Cursors::Text() );
 
 		mCreateObjectType = Text;
-		mState = CreateIdle;
+                mState            = CreateIdle;
 	}
 
 
 	///
 	/// Create barcode mode
 	///
-	void
-	LabelEditor::createBarcodeMode()
+        void LabelEditor::createBarcodeMode()
 	{
 		setCursor( Cursors::Barcode() );
 
 		mCreateObjectType = Barcode;
-		mState = CreateIdle;
+                mState            = CreateIdle;
 	}
 
 
 	///
 	/// Resize Event Handler
 	///
-	void
-	LabelEditor::resizeEvent( QResizeEvent *event )
+        void LabelEditor::resizeEvent( QResizeEvent* event )
 	{
 		if ( mModel )
 		{
@@ -418,8 +398,8 @@ namespace glabels
 			else
 			{
 				/* Re-adjust origin to center label in widget. */
-				mX0 = (width()/mScale - mModel->w()) / 2;
-				mY0 = (height()/mScale - mModel->h()) / 2;
+                                mX0 = ( width() / mScale - mModel->w() ) / 2;
+                                mY0 = ( height() / mScale - mModel->h() ) / 2;
 
 				update();
 			}
@@ -430,8 +410,7 @@ namespace glabels
 	///
 	/// Mouse Button Press Event Handler
 	///
-	void
-	LabelEditor::mousePressEvent( QMouseEvent* event )
+        void LabelEditor::mousePressEvent( QMouseEvent* event )
 	{
 		if ( mModel )
 		{
@@ -443,31 +422,31 @@ namespace glabels
 			transform.scale( mScale, mScale );
 			transform.translate( mX0.pt(), mY0.pt() );
 
-			QPointF pWorld = transform.inverted().map( event->pos() );
+                        QPointF         pWorld = transform.inverted().map( event->pos() );
 			model::Distance xWorld = model::Distance::pt( pWorld.x() );
 			model::Distance yWorld = model::Distance::pt( pWorld.y() );
 
-		
+
 			if ( event->button() & Qt::LeftButton )
 			{
 				//
 				// LEFT BUTTON
 				//
-				switch (mState)
+                                switch ( mState )
 				{
 
-				case IdleState:
-				{
+                                case IdleState: {
 					model::ModelObject* object = nullptr;
-					model::Handle* handle = nullptr;
+                                        model::Handle*      handle = nullptr;
 					if ( mModel->isSelectionAtomic() &&
-					     (handle = mModel->handleAt( mScale, xWorld, yWorld )) != nullptr )
+                                             ( handle = mModel->handleAt( mScale, xWorld, yWorld ) ) !=
+                                                     nullptr )
 					{
 						//
 						// Start an object resize
 						//
-						mResizeObject = handle->owner();
-						mResizeHandle = handle;
+                                                mResizeObject      = handle->owner();
+                                                mResizeHandle      = handle;
 						mResizeHonorAspect = event->modifiers() & Qt::ControlModifier;
 						if ( mResizeObject->lockAspectRatio() )
 						{
@@ -476,7 +455,8 @@ namespace glabels
 
 						mState = ArrowResize;
 					}
-					else if ( (object = mModel->objectAt( mScale, xWorld, yWorld )) != nullptr )
+                                        else if ( ( object = mModel->objectAt( mScale, xWorld, yWorld ) ) !=
+                                                  nullptr )
 					{
 						//
 						// Start a Move Selection (adjusting selection if necessary)
@@ -514,7 +494,7 @@ namespace glabels
 						//
 						// Start a Select Region
 						//
-						if ( !(event->modifiers() & Qt::ControlModifier) )
+                                                if ( !( event->modifiers() & Qt::ControlModifier ) )
 						{
 							mModel->unselectAll();
 						}
@@ -532,8 +512,7 @@ namespace glabels
 				break;
 
 
-				case CreateIdle:
-				{
+                                case CreateIdle: {
 					switch ( mCreateObjectType )
 					{
 					case Box:
@@ -542,7 +521,7 @@ namespace glabels
 					case Ellipse:
 						mCreateObject = new model::ModelEllipseObject();
 						break;
-					case Line: 
+                                        case Line:
 						mCreateObject = new model::ModelLineObject();
 						break;
 					case Image:
@@ -555,7 +534,8 @@ namespace glabels
 						mCreateObject = new model::ModelBarcodeObject();
 						break;
 					default:
-						qDebug() << "LabelEditor::mousePressEvent: Invalid creation type. Should not happen!";
+                                                qDebug() << "LabelEditor::mousePressEvent: Invalid creation "
+                                                            "type. Should not happen!";
 						break;
 					}
 
@@ -573,15 +553,13 @@ namespace glabels
 				}
 				break;
 
-				
-				default:
-				{
-					qDebug() << "LabelEditor::mousePressEvent: Invalid state. Should not happen!";
+
+                                default: {
+                                        qDebug() << "LabelEditor::mousePressEvent: Invalid state. Should not "
+                                                    "happen!";
 				}
 				break;
-
 				}
-
 			}
 			else if ( event->button() & Qt::RightButton )
 			{
@@ -600,8 +578,7 @@ namespace glabels
 	///
 	/// Mouse Movement Event Handler
 	///
-	void
-	LabelEditor::mouseMoveEvent( QMouseEvent* event )
+        void LabelEditor::mouseMoveEvent( QMouseEvent* event )
 	{
 		if ( mModel )
 		{
@@ -613,11 +590,11 @@ namespace glabels
 			transform.scale( mScale, mScale );
 			transform.translate( mX0.pt(), mY0.pt() );
 
-			QPointF pWorld = transform.inverted().map( event->pos() );
+                        QPointF         pWorld = transform.inverted().map( event->pos() );
 			model::Distance xWorld = model::Distance::pt( pWorld.x() );
 			model::Distance yWorld = model::Distance::pt( pWorld.y() );
 
-		
+
 			/*
 			 * Emit signal regardless of mode
 			 */
@@ -627,7 +604,7 @@ namespace glabels
 			/*
 			 * Handle event as appropriate for state
 			 */
-			switch (mState)
+                        switch ( mState )
 			{
 
 			case IdleState:
@@ -653,15 +630,14 @@ namespace glabels
 				break;
 
 			case ArrowMove:
-				mUndoRedoModel->checkpoint( tr("Move") );
-				mModel->moveSelection( (xWorld - mMoveLastX),
-				                       (yWorld - mMoveLastY) );
+                                mUndoRedoModel->checkpoint( tr( "Move" ) );
+                                mModel->moveSelection( ( xWorld - mMoveLastX ), ( yWorld - mMoveLastY ) );
 				mMoveLastX = xWorld;
 				mMoveLastY = yWorld;
 				break;
 
 			case ArrowResize:
-				mUndoRedoModel->checkpoint( tr("Resize") );
+                                mUndoRedoModel->checkpoint( tr( "Resize" ) );
 				handleResizeMotion( xWorld, yWorld );
 				break;
 
@@ -669,7 +645,7 @@ namespace glabels
 				break;
 
 			case CreateDrag:
-				switch (mCreateObjectType)
+                                switch ( mCreateObjectType )
 				{
 				case Box:
 				case Ellipse:
@@ -678,15 +654,17 @@ namespace glabels
 				case Barcode:
 					mCreateObject->setPosition( min( xWorld, mCreateX0 ),
 					                            min( yWorld, mCreateY0 ) );
-					mCreateObject->setSize( max(xWorld,mCreateX0) - min(xWorld,mCreateX0),
-					                        max(yWorld,mCreateY0) - min(yWorld,mCreateY0) );
-								
+                                        mCreateObject->setSize(
+                                                max( xWorld, mCreateX0 ) - min( xWorld, mCreateX0 ),
+                                                max( yWorld, mCreateY0 ) - min( yWorld, mCreateY0 ) );
+
 					break;
 				case Line:
 					mCreateObject->setSize( xWorld - mCreateX0, yWorld - mCreateY0 );
 					break;
 				default:
-					qDebug() << "LabelEditor::mouseMoveEvent: Invalid creation mode. Should not happen!";
+                                        qDebug() << "LabelEditor::mouseMoveEvent: Invalid creation mode. "
+                                                    "Should not happen!";
 					break;
 				}
 				break;
@@ -694,7 +672,6 @@ namespace glabels
 			default:
 				qDebug() << "LabelEditor::mouseMoveEvent: Invalid state. Should not happen!";
 				break;
-
 			}
 		}
 	}
@@ -703,8 +680,7 @@ namespace glabels
 	///
 	/// Mouse Button Release Event Handler
 	///
-	void
-	LabelEditor::mouseReleaseEvent( QMouseEvent* event )
+        void LabelEditor::mouseReleaseEvent( QMouseEvent* event )
 	{
 		if ( mModel )
 		{
@@ -716,17 +692,17 @@ namespace glabels
 			transform.scale( mScale, mScale );
 			transform.translate( mX0.pt(), mY0.pt() );
 
-			QPointF pWorld = transform.inverted().map( event->pos() );
+                        QPointF         pWorld = transform.inverted().map( event->pos() );
 			model::Distance xWorld = model::Distance::pt( pWorld.x() );
 			model::Distance yWorld = model::Distance::pt( pWorld.y() );
 
-		
+
 			if ( event->button() & Qt::LeftButton )
 			{
 				//
 				// LEFT BUTTON Release
 				//
-				switch (mState)
+                                switch ( mState )
 				{
 
 				case ArrowResize:
@@ -745,9 +721,10 @@ namespace glabels
 					break;
 
 				case CreateDrag:
-					if ( (fabs(mCreateObject->w()) < 4) && (fabs(mCreateObject->h()) < 4) )
+                                        if ( ( fabs( mCreateObject->w() ) < 4 ) &&
+                                             ( fabs( mCreateObject->h() ) < 4 ) )
 					{
-						switch (mCreateObjectType)
+                                                switch ( mCreateObjectType )
 						{
 						case Text:
 							mCreateObject->setSize( 72, 36 );
@@ -771,9 +748,7 @@ namespace glabels
 				default:
 					mState = IdleState;
 					break;
-
 				}
-
 			}
 		}
 	}
@@ -782,8 +757,7 @@ namespace glabels
 	///
 	/// Leave Event Handler
 	///
-	void
-	LabelEditor::leaveEvent( QEvent* event )
+        void LabelEditor::leaveEvent( QEvent* event )
 	{
 		if ( mModel )
 		{
@@ -795,13 +769,11 @@ namespace glabels
 	///
 	/// Handle resize motion
 	///
-	void
-	LabelEditor::handleResizeMotion( const model::Distance& xWorld,
-	                                 const model::Distance& yWorld )
+        void LabelEditor::handleResizeMotion( const model::Distance& xWorld, const model::Distance& yWorld )
 	{
-		QPointF p( xWorld.pt(), yWorld.pt() );
+                QPointF                 p( xWorld.pt(), yWorld.pt() );
 		model::Handle::Location location = mResizeHandle->location();
-	
+
 		/*
 		 * Change point to object relative coordinates
 		 */
@@ -873,13 +845,14 @@ namespace glabels
 			y0 = y0 + y1;
 			break;
 		default:
-			qDebug() << "LabelEditor::handleResizeMotion: Invalid Handle Location. Should not happen!";
+                        qDebug() << "LabelEditor::handleResizeMotion: Invalid Handle Location. Should not "
+                                    "happen!";
 		}
 
 		/*
 		 * Set size
 		 */
-		if ( !(location == model::Handle::P1) && !(location == model::Handle::P2) )
+                if ( !( location == model::Handle::P1 ) && !( location == model::Handle::P2 ) )
 		{
 			if ( mResizeHonorAspect )
 			{
@@ -887,22 +860,21 @@ namespace glabels
 				{
 				case model::Handle::E:
 				case model::Handle::W:
-					mResizeObject->setWHonorAspect( model::Distance::pt(w) );
+                                        mResizeObject->setWHonorAspect( model::Distance::pt( w ) );
 					break;
 				case model::Handle::N:
 				case model::Handle::S:
-					mResizeObject->setHHonorAspect( model::Distance::pt(h) );
+                                        mResizeObject->setHHonorAspect( model::Distance::pt( h ) );
 					break;
 				default:
-					mResizeObject->setSizeHonorAspect( model::Distance::pt(w),
-					                                   model::Distance::pt(h) );
+                                        mResizeObject->setSizeHonorAspect( model::Distance::pt( w ),
+                                                                           model::Distance::pt( h ) );
 					break;
 				}
 			}
 			else
 			{
-				mResizeObject->setSize( model::Distance::pt(w),
-				                        model::Distance::pt(h) );
+                                mResizeObject->setSize( model::Distance::pt( w ), model::Distance::pt( h ) );
 			}
 
 			/*
@@ -928,8 +900,7 @@ namespace glabels
 		}
 		else
 		{
-			mResizeObject->setSize( model::Distance::pt(w),
-			                        model::Distance::pt(h) );
+                        mResizeObject->setSize( model::Distance::pt( w ), model::Distance::pt( h ) );
 		}
 
 		/*
@@ -938,43 +909,41 @@ namespace glabels
 		QPointF p0( x0, y0 );
 		p0 = mResizeObject->matrix().map( p0 );
 		p0 += QPointF( mResizeObject->x0().pt(), mResizeObject->y0().pt() );
-		mResizeObject->setPosition( model::Distance::pt(p0.x()),
-		                            model::Distance::pt(p0.y()) );
+                mResizeObject->setPosition( model::Distance::pt( p0.x() ), model::Distance::pt( p0.y() ) );
 	}
 
 
 	///
 	/// Key Press Event Handler
-	void
-	LabelEditor::keyPressEvent( QKeyEvent* event )
+        void LabelEditor::keyPressEvent( QKeyEvent* event )
 	{
 		if ( mState == IdleState )
 		{
-			switch (event->key())
+                        switch ( event->key() )
 			{
 
 			case Qt::Key_Left:
-				mUndoRedoModel->checkpoint( tr("Move") );
-				mModel->moveSelection( -mStepSize, model::Distance(0) );
+                                mUndoRedoModel->checkpoint( tr( "Move" ) );
+                                mModel->moveSelection( -mStepSize, model::Distance( 0 ) );
 				break;
 
 			case Qt::Key_Up:
-				mUndoRedoModel->checkpoint( tr("Move") );
-				mModel->moveSelection( model::Distance(0), -mStepSize );
+                                mUndoRedoModel->checkpoint( tr( "Move" ) );
+                                mModel->moveSelection( model::Distance( 0 ), -mStepSize );
 				break;
 
 			case Qt::Key_Right:
-				mUndoRedoModel->checkpoint( tr("Move") );
-				mModel->moveSelection( mStepSize, model::Distance(0) );
+                                mUndoRedoModel->checkpoint( tr( "Move" ) );
+                                mModel->moveSelection( mStepSize, model::Distance( 0 ) );
 				break;
 
 			case Qt::Key_Down:
-				mUndoRedoModel->checkpoint( tr("Move") );
-				mModel->moveSelection( model::Distance(0), mStepSize );
+                                mUndoRedoModel->checkpoint( tr( "Move" ) );
+                                mModel->moveSelection( model::Distance( 0 ), mStepSize );
 				break;
 
 			case Qt::Key_Delete:
-				mUndoRedoModel->checkpoint( tr("Delete") );
+                                mUndoRedoModel->checkpoint( tr( "Delete" ) );
 				mModel->deleteSelection();
 				setCursor( Qt::ArrowCursor );
 				break;
@@ -982,7 +951,6 @@ namespace glabels
 			default:
 				QWidget::keyPressEvent( event );
 				break;
-			
 			}
 		}
 		else
@@ -995,8 +963,7 @@ namespace glabels
 	///
 	/// Paint Event Handler
 	///
-	void
-	LabelEditor::paintEvent( QPaintEvent* event )
+        void LabelEditor::paintEvent( QPaintEvent* event )
 	{
 		if ( mModel )
 		{
@@ -1005,7 +972,7 @@ namespace glabels
 			painter.setRenderHint( QPainter::Antialiasing, true );
 			painter.setRenderHint( QPainter::TextAntialiasing, true );
 			painter.setRenderHint( QPainter::SmoothPixmapTransform, true );
-		
+
 			/* Fill background before any transformations */
 			painter.setBrush( QBrush( backgroundColor ) );
 			painter.setPen( Qt::NoPen );
@@ -1030,10 +997,9 @@ namespace glabels
 	//
 	// Handle drag enter event
 	//
-	void LabelEditor::dragEnterEvent( QDragEnterEvent *event )
+        void LabelEditor::dragEnterEvent( QDragEnterEvent* event )
 	{
-		if ( event->mimeData()->hasUrls()   ||
-		     event->mimeData()->hasImage()  ||
+                if ( event->mimeData()->hasUrls() || event->mimeData()->hasImage() ||
 		     event->mimeData()->hasText() )
 		{
 			event->acceptProposedAction();
@@ -1048,10 +1014,9 @@ namespace glabels
 	//
 	// Handle drag move event
 	//
-	void LabelEditor::dragMoveEvent( QDragMoveEvent *event )
+        void LabelEditor::dragMoveEvent( QDragMoveEvent* event )
 	{
-		if ( event->mimeData()->hasUrls()   ||
-		     event->mimeData()->hasImage()  ||
+                if ( event->mimeData()->hasUrls() || event->mimeData()->hasImage() ||
 		     event->mimeData()->hasText() )
 		{
 			event->acceptProposedAction();
@@ -1066,7 +1031,7 @@ namespace glabels
 	//
 	// Handle drop event
 	//
-	void LabelEditor::dropEvent( QDropEvent *event )
+        void LabelEditor::dropEvent( QDropEvent* event )
 	{
 		/*
 		 * Transform to label coordinates
@@ -1076,26 +1041,31 @@ namespace glabels
 		transform.scale( mScale, mScale );
 		transform.translate( mX0.pt(), mY0.pt() );
 
-		QPointF pWorld = transform.inverted().map( event->position() );
+#if QT_VERSION >= QT_VERSION_CHECK( 6, 0, 0 )
+                QPointF pWorld = transform.inverted().map( event->position() );
+#else
+                QPointF pWorld = transform.inverted().map( event->pos() );
+#endif
+
 		auto xWorld = model::Distance::pt( pWorld.x() );
 		auto yWorld = model::Distance::pt( pWorld.y() );
-		auto p = model::Point( xWorld, yWorld );
+                auto p      = model::Point( xWorld, yWorld );
 
 		if ( event->mimeData()->hasUrls() )
 		{
-			mUndoRedoModel->checkpoint( tr("Drop") );
+                        mUndoRedoModel->checkpoint( tr( "Drop" ) );
 			mModel->pasteAsUrls( event->mimeData(), p );
 			event->acceptProposedAction();
 		}
 		else if ( event->mimeData()->hasImage() )
 		{
-			mUndoRedoModel->checkpoint( tr("Drop") );
+                        mUndoRedoModel->checkpoint( tr( "Drop" ) );
 			mModel->pasteAsImage( event->mimeData(), p );
 			event->acceptProposedAction();
 		}
 		else if ( event->mimeData()->hasText() )
 		{
-			mUndoRedoModel->checkpoint( tr("Drop") );
+                        mUndoRedoModel->checkpoint( tr( "Drop" ) );
 			mModel->pasteAsText( event->mimeData(), p );
 			event->acceptProposedAction();
 		}
@@ -1109,8 +1079,7 @@ namespace glabels
 	///
 	/// Draw Background Layer
 	///
-	void
-	LabelEditor::drawBgLayer( QPainter* painter )
+        void LabelEditor::drawBgLayer( QPainter* painter )
 	{
 		/*
 		 * Draw shadow
@@ -1120,7 +1089,7 @@ namespace glabels
 		painter->setBrush( QBrush( shadowColor ) );
 		painter->setPen( Qt::NoPen );
 
-		painter->translate( shadowOffsetPixels/mScale, shadowOffsetPixels/mScale );
+                painter->translate( shadowOffsetPixels / mScale, shadowOffsetPixels / mScale );
 
 		if ( mModel->rotate() )
 		{
@@ -1154,8 +1123,7 @@ namespace glabels
 	///
 	/// Draw Grid Layer
 	///
-	void
-	LabelEditor::drawGridLayer( QPainter* painter )
+        void LabelEditor::drawGridLayer( QPainter* painter )
 	{
 		if ( mGridVisible )
 		{
@@ -1163,7 +1131,7 @@ namespace glabels
 			auto gridOrigin  = model::Settings::gridOrigin();
 
 			bool isRectangular = dynamic_cast<const model::FrameRect*>( mModel->frame() );
-			
+
 			model::Distance w = mModel->frame()->w();
 			model::Distance h = mModel->frame()->h();
 
@@ -1173,8 +1141,8 @@ namespace glabels
 			auto y0 = gridSpacing;
 			if ( gridOrigin == model::Settings::ORIGIN_CENTER || !isRectangular )
 			{
-				x0 = fmod( w/2, gridSpacing );
-				y0 = fmod( h/2, gridSpacing );
+                                x0 = fmod( w / 2, gridSpacing );
+                                y0 = fmod( h / 2, gridSpacing );
 			}
 
 			painter->save();
@@ -1208,8 +1176,7 @@ namespace glabels
 	///
 	/// Draw Markup Layer
 	///
-	void
-	LabelEditor::drawMarkupLayer( QPainter* painter )
+        void LabelEditor::drawMarkupLayer( QPainter* painter )
 	{
 		if ( mMarkupVisible )
 		{
@@ -1217,7 +1184,7 @@ namespace glabels
 
 			QPen pen( markupLineColor, markupLineWidthPixels );
 			pen.setCosmetic( true );
-		
+
 			painter->setBrush( Qt::NoBrush );
 			painter->setPen( pen );
 
@@ -1227,7 +1194,7 @@ namespace glabels
 				painter->translate( -mModel->frame()->w().pt(), 0 );
 			}
 
-			foreach( model::Markup* markup, mModel->frame()->markups() )
+                        foreach ( model::Markup* markup, mModel->frame()->markups() )
 			{
 				painter->drawPath( markup->path( mModel->frame() ) );
 			}
@@ -1240,8 +1207,7 @@ namespace glabels
 	///
 	/// Draw Objects Layer
 	///
-	void
-	LabelEditor::drawObjectsLayer( QPainter* painter )
+        void LabelEditor::drawObjectsLayer( QPainter* painter )
 	{
 		mModel->draw( painter, true, nullptr, nullptr );
 	}
@@ -1250,8 +1216,7 @@ namespace glabels
 	///
 	/// Draw Foreground Layer
 	///
-	void
-	LabelEditor::drawFgLayer( QPainter* painter )
+        void LabelEditor::drawFgLayer( QPainter* painter )
 	{
 		/*
 		 * Draw label outline
@@ -1277,8 +1242,7 @@ namespace glabels
 	///
 	/// Draw Highlight Layer
 	///
-	void
-	LabelEditor::drawHighlightLayer( QPainter* painter )
+        void LabelEditor::drawHighlightLayer( QPainter* painter )
 	{
 		painter->save();
 
@@ -1297,8 +1261,7 @@ namespace glabels
 	///
 	/// Draw Select Region Layer
 	///
-	void
-	LabelEditor::drawSelectRegionLayer( QPainter* painter )
+        void LabelEditor::drawSelectRegionLayer( QPainter* painter )
 	{
 		if ( mSelectRegionVisible )
 		{
@@ -1310,10 +1273,9 @@ namespace glabels
 			painter->setPen( pen );
 
 			painter->drawRect( mSelectRegion.rect() );
-		
+
 			painter->restore();
 		}
-
 	}
 
 
@@ -1323,7 +1285,7 @@ namespace glabels
 	void LabelEditor::onSettingsChanged()
 	{
 		model::Units units = model::Settings::units();
-	
+
 		mStepSize = model::Distance( units.resolution(), units );
 
 		update();
@@ -1335,18 +1297,18 @@ namespace glabels
 	///
 	void LabelEditor::onModelSizeChanged()
 	{
-		if (mZoomToFitFlag)
+                if ( mZoomToFitFlag )
 		{
 			double wPixels = mScrollArea->maximumViewportSize().width();
 			double hPixels = mScrollArea->maximumViewportSize().height();
-	
+
 			double x_scale = ( wPixels - ZOOM_TO_FIT_PAD ) / mModel->w().pt();
 			double y_scale = ( hPixels - ZOOM_TO_FIT_PAD ) / mModel->h().pt();
 			double newZoom = qMin( x_scale, y_scale ) * model::PTS_PER_INCH / physicalDpiX();
 
 			// Limits
 			newZoom = qMin( newZoom, zoomLevels[0] );
-			newZoom = qMax( newZoom, zoomLevels[nZoomLevels-1] );
+                        newZoom = qMax( newZoom, zoomLevels[nZoomLevels - 1] );
 
 			mZoom = newZoom;
 		}
@@ -1354,12 +1316,12 @@ namespace glabels
 		/* Actual scale depends on DPI of display (assume DpiX == DpiY). */
 		mScale = mZoom * physicalDpiX() / model::PTS_PER_INCH;
 
-		setMinimumSize( mScale*mModel->w().pt() + ZOOM_TO_FIT_PAD,
-		                mScale*mModel->h().pt() + ZOOM_TO_FIT_PAD );
+                setMinimumSize( mScale * mModel->w().pt() + ZOOM_TO_FIT_PAD,
+                                mScale * mModel->h().pt() + ZOOM_TO_FIT_PAD );
 
 		/* Adjust origin to center label in widget. */
-		mX0 = (width()/mScale - mModel->w()) / 2;
-		mY0 = (height()/mScale - mModel->h()) / 2;
+                mX0 = ( width() / mScale - mModel->w() ) / 2;
+                mY0 = ( height() / mScale - mModel->h() ) / 2;
 
 		update();
 

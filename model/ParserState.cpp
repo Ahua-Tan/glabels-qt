@@ -29,21 +29,18 @@ namespace glabels
 	namespace model
 	{
 
-		ParserState::ParserState( const QString& string,
-		                          unsigned int   pos )
-			: mString(&string),
-			  mPos( pos )
+                ParserState::ParserState( const QString& string, unsigned int pos )
+                        : mString( &string ), mPos( pos )
 		{
 		}
 
 
-		QChar
-		ParserState::operator[]( unsigned int i ) const
+                QChar ParserState::operator[]( unsigned int i ) const
 		{
 			auto ii = mPos + i;
 			if ( ii < mString->size() )
 			{
-				return (*mString)[ii];
+                                return mString->at( ii );
 			}
 			else
 			{
@@ -52,36 +49,39 @@ namespace glabels
 		}
 
 
-		bool
-		ParserState::isNextSubString( const QString& s ) const
+                bool ParserState::isNextSubString( const QString& s ) const
 		{
 			for ( unsigned int i = 0; i < s.size(); i++ )
 			{
-				if ( operator[](i) != s[i] ) return false;
+                                if ( operator[]( i ) != s[i] )
+                                        return false;
 			}
 			return true;
 		}
 
 
-		qsizetype
-		ParserState::pos() const
+                qsizetype ParserState::pos() const
 		{
 			return mPos;
 		}
 
 
-		qsizetype
-		ParserState::charsLeft() const
+                qsizetype ParserState::charsLeft() const
 		{
 			return mString->size() - mPos;
 		}
 
 
-		void
-		ParserState::advanceChars( unsigned int i )
+                void ParserState::advanceChars( unsigned int i )
 		{
-			mPos = std::min( mPos + i, mString->size() );
+#if QT_VERSION < QT_VERSION_CHECK( 6, 0, 0 )
+                        mPos = std::min( static_cast<qsizetype>( mPos + i ),
+                                         static_cast<qsizetype>( mString->size() ) );
+
+#else
+                        mPos = std::min( mPos + i, mString->size() );
+#endif
 		}
 
-	}
-}
+        } // namespace model
+} // namespace glabels
