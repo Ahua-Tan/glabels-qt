@@ -32,27 +32,24 @@ namespace glabels
 	//
 	namespace
 	{
-		const int     border = 4;
-		const int     wSwatch = 25;
-		const int     hSwatch = 25;
+                const int border  = 4;
+                const int wSwatch = 25;
+                const int hSwatch = 25;
 
-		const int     hoverBgOutlineWidthPixels = 1;
+                const int hoverBgOutlineWidthPixels = 1;
 
-		const int     outlineWidthPixels = 1;
-	}
+                const int outlineWidthPixels = 1;
+        } // namespace
 
 
 	///
 	/// Constructor From Data
 	///
-	ColorPaletteItem::ColorPaletteItem( int            id,
-	                                    const QColor&  color,
-	                                    const QString& tip,
-	                                    QWidget*       parent )
-		: QWidget(parent), mId(id), mColor(color), mTip(tip), mHover(false)
+        ColorPaletteItem::ColorPaletteItem( int id, const QColor& color, const QString& tip, QWidget* parent )
+                : QWidget( parent ), mId( id ), mColor( color ), mTip( tip ), mHover( false )
 	{
 		setSizePolicy( QSizePolicy( QSizePolicy::Fixed, QSizePolicy::Fixed ) );
-		setMinimumSize( wSwatch+2*border+1, hSwatch+2*border+1 );
+                setMinimumSize( wSwatch + 2 * border + 1, hSwatch + 2 * border + 1 );
 		setToolTip( tip );
 	}
 
@@ -60,9 +57,7 @@ namespace glabels
 	///
 	/// Color Property Setter
 	///
-	void ColorPaletteItem::setColor( int            id,
-	                                 const QColor&  color,
-	                                 const QString& tip )
+        void ColorPaletteItem::setColor( int id, const QColor& color, const QString& tip )
 	{
 		mId    = id;
 		mColor = color;
@@ -78,7 +73,7 @@ namespace glabels
 	///
 	void ColorPaletteItem::paintEvent( QPaintEvent* event )
 	{
-		QPainter painter(this);
+                QPainter painter( this );
 
 		//
 		// Draw swatch
@@ -88,11 +83,11 @@ namespace glabels
 			if ( mHover )
 			{
 				QPen pen( palette().color( QPalette::Text ) );
-				pen.setWidth( 2*outlineWidthPixels );
+                                pen.setWidth( 2 * outlineWidthPixels );
 				pen.setJoinStyle( Qt::MiterJoin );
 				painter.setPen( pen );
 				painter.setBrush( QBrush( mColor ) );
-				painter.drawRect( 1, 1, width()-2, height()-2 );
+                                painter.drawRect( 1, 1, width() - 2, height() - 2 );
 			}
 			else
 			{
@@ -102,8 +97,6 @@ namespace glabels
 				painter.setBrush( QBrush( mColor ) );
 				painter.drawRect( border, border, wSwatch, hSwatch );
 			}
-
-			
 		}
 		else
 		{
@@ -113,14 +106,13 @@ namespace glabels
 			painter.setBrush( QBrush( mColor ) );
 			painter.drawRect( border, border, wSwatch, hSwatch );
 		}
-
 	}
 
 
 	///
 	/// Enter Event
 	///
-	void ColorPaletteItem::enterEvent( QEnterEvent* event )
+        void ColorPaletteItem::enterEvent( QEvent* event )
 	{
 		mHover = true;
 		update();
@@ -136,7 +128,7 @@ namespace glabels
 		update();
 	}
 
-	
+
 	///
 	/// Mouse Press Event
 	///

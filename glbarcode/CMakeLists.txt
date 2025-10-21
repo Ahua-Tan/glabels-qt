@@ -41,6 +41,6 @@ target_include_directories (glbarcode
   PUBLIC ..
 )
 
-target_link_libraries (glbarcode
-  Qt6::Widgets
+target_link_libraries(glbarcode
+    Qt${QT_VERSION_MAJOR}::Widgets
 )

@@ -10,7 +10,6 @@ project (glabels-qt VERSION "3.99.0")
 #
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
-
 #=======================================
 # Version Information
 #=======================================
@@ -27,7 +26,7 @@ execute_process(
 if (NOT ${BRANCH_VALID} STREQUAL "0")
   set (BRANCH "Unkonwn")
 endif ()
-  
+
 execute_process(
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   COMMAND git rev-list --count ${BRANCH}
@@ -38,7 +37,7 @@ execute_process(
 if (NOT ${COMMIT_COUNT_VALID} STREQUAL "0")
   set (COMMIT_COUNT "?")
 endif ()
-  
+
 execute_process(
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   COMMAND git log -1 --format=%h
@@ -49,7 +48,7 @@ execute_process(
 if (NOT ${COMMIT_HASH_VALID} STREQUAL "0")
   set (COMMIT_HASH "exported")
 endif ()
-  
+
 execute_process(
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   COMMAND git log -1 --format=%cd --date=short
@@ -72,32 +71,59 @@ set(LONG_VERSION_STRING "${VERSION_STRING} (${COMMIT_HASH} ${COMMIT_DATE})")
 # Auto-generate version file
 configure_file (VERSION.txt.in VERSION.txt @ONLY)
 
-
 #=======================================
 # Packaging Information
 #=======================================
 set (CPACK_PACKAGE_VENDOR ${WEBSITE})
-
 set (CPACK_PACKAGE_NAME glabels)
-
 set (CPACK_PACKAGE_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
 set (CPACK_PACKAGE_VERSION_MINOR ${PROJECT_VERSION_MINOR})
 set (CPACK_PACKAGE_VERSION_PATCH ${PROJECT_VERSION_PATCH})
 set (CPACK_PACKAGE_VERSION_TWEAK ${COMMIT_HASH})
-
 set (CPACK_PACKAGE_DESCRIPTION_SUMMARY "gLabels Label Designer")
 set (CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
-
 set (CPACK_PACKAGE_EXECUTABLES "glabels-qt;gLabels")
 set (CPACK_CREATE_DESKTOP_LINKS "glabels-qt")
-
 set (CPACK_NSIS_DISPLAY_NAME "gLabels")
 set (CPACK_NSIS_URL_INFO_ABOUT "http://${WEBSITE}")
 set (CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}/glabels/windows-icon/glabels.ico")
 set (CPACK_NSIS_MODIFY_PATH "ON")
-
 include (CPack)
 
+#=======================================
+# Qt Version Detection and Configuration
+#=======================================
+# Try to find Qt6 first, fallback to Qt5 if not found
+set(QT_MIN_VERSION_MAJOR 5)
+set(QT_MIN_VERSION_MINOR 6)
+
+find_package(Qt6 ${QT_MIN_VERSION_MAJOR}.${QT_MIN_VERSION_MINOR} QUIET COMPONENTS Core Gui Widgets PrintSupport Xml Svg LinguistTools Test)
+if(Qt6_FOUND)
+    message(STATUS "Using Qt6 version ${Qt6_VERSION}")
+    set(QT_VERSION_MAJOR 6)
+    set(QT_LIBRARIES Qt6::Core Qt6::Gui Qt6::Widgets Qt6::PrintSupport Qt6::Xml Qt6::Svg)
+    set(QT_TEST_LIB Qt6::Test)
+    set(QT_LINGUISTTOOLS_EXECUTABLE Qt6::lupdate Qt6::lrelease)
+else()
+    find_package(Qt5 ${QT_MIN_VERSION_MAJOR}.${QT_MIN_VERSION_MINOR} REQUIRED COMPONENTS Core Gui Widgets PrintSupport Xml Svg LinguistTools Test)
+    message(STATUS "Using Qt5 version ${Qt5_VERSION}")
+    set(QT_VERSION_MAJOR 5)
+    set(QT_LIBRARIES Qt5::Core Qt5::Gui Qt5::Widgets Qt5::PrintSupport Qt5::Xml Qt5::Svg)
+    set(QT_TEST_LIB Qt5::Test)
+    set(QT_LINGUISTTOOLS_EXECUTABLE Qt5::lupdate Qt5::lrelease)
+endif()
+
+# Windows-specific Qt path detection
+if (WIN32)
+    if(QT_VERSION_MAJOR EQUAL 6)
+        get_target_property(QT_QMAKE_EXECUTABLE Qt6::qmake IMPORTED_LOCATION)
+    else()
+        get_target_property(QT_QMAKE_EXECUTABLE Qt5::qmake IMPORTED_LOCATION)
+    endif()
+
+    get_filename_component(QT_BIN_DIR ${QT_QMAKE_EXECUTABLE} DIRECTORY)
+    get_filename_component(QT_BASE_DIR ${QT_BIN_DIR} DIRECTORY)
+endif()
 
 #=======================================
 # Dependencies
@@ -108,15 +134,7 @@ if (MINGW)
    string (REPLACE "/bin"     "" MINGW_BASE_DIR ${MINGW_BIN_DIR})
 
    # Make sure we can find MINGW libraries, e.g. zlib
-   set (CMAKE_PREFIX_PATH ${MINGW_BASE_DIR} )
-endif ()
-
-find_package (Qt6 6.2 REQUIRED COMPONENTS Core Gui Widgets PrintSupport Xml Svg LinguistTools Test)
-
-if (WIN32)
-   # Locate Qt directories
-   execute_process (COMMAND qtpaths --install-prefix OUTPUT_VARIABLE QT_BASE_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
-   set (QT_BIN_DIR ${QT_BASE_DIR}/bin)
+   set (CMAKE_PREFIX_PATH ${MINGW_BASE_DIR})
 endif ()
 
 #
@@ -126,29 +144,18 @@ find_package (ZLIB 1.2 QUIET)
 find_package (GnuBarcode 0.98 QUIET)
 find_package (LibQrencode 3.4 QUIET)
 find_package (LibZint 2.15 QUIET)
-# Unit testing support
-find_package (Qt5Test 5.6 QUIET)
-
 
 #=======================================
 # Global compiler options
 #=======================================
 if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
-   #
-   # Uncomment to compile everything with aggressively pedantic options
-   # (not recommended -- only for testing -- also not portable)
-   #
-   #add_compile_options("-Wall" "-Wextra" "-Wpedantic" "-Wno-unused-parameter" "-Werror")
-
-   # Uncomment to always compile with debug symbols
    add_compile_options("-g")
 endif ()
-
 
 #=======================================
 # Unit Testing
 #=======================================
-if (Qt6Test_FOUND)
+if (QT_TEST_LIB)
   enable_testing ()
 endif ()
 
@@ -165,7 +172,6 @@ add_subdirectory (user-docs)
 add_subdirectory (translations)
 add_subdirectory (data)
 
-
 #=======================================
 # Print configuration information
 #=======================================
@@ -178,48 +184,44 @@ message (STATUS "Installation prefix ..... " ${CMAKE_INSTALL_PREFIX})
 message (STATUS "Source code location .... " ${glabels_SOURCE_DIR})
 message (STATUS "CMake version ........... " ${CMAKE_VERSION})
 message (STATUS "C++ Compiler ............ " ${CMAKE_CXX_COMPILER_ID} " " ${CMAKE_CXX_COMPILER} " " ${CMAKE_CXX_COMPILER_VERSION})
-message (STATUS "Qt version .............. " ${Qt6Core_VERSION})
+
+if(QT_VERSION_MAJOR EQUAL 6)
+    message (STATUS "Qt version .............. " ${Qt6_VERSION})
+else()
+    message (STATUS "Qt version .............. " ${Qt5_VERSION})
+endif()
 
 if (ZLIB_FOUND)
   message (STATUS "zlib (optional).......... " ${ZLIB_VERSION_STRING})
-else (ZLIB_FOUND)
+else ()
   message (STATUS "zlib (optional).......... No.")
-endif (ZLIB_FOUND)
+endif ()
 
 if (GNUBARCODE_FOUND)
   message (STATUS "GNU Barcode (optional)... " ${GNUBARCODE_VERSION_STRING})
-else (GNUBARCODE_FOUND)
+else ()
   message (STATUS "GNU Barcode (optional)... No.")
-endif (GNUBARCODE_FOUND)
+endif ()
 
 if (LIBQRENCODE_FOUND)
   message (STATUS "qrencode (optional)...... " ${LIBQRENCODE_VERSION_STRING})
-else (LIBQRENCODE_FOUND)
+else ()
   message (STATUS "qrencode (optional)...... No.")
-endif (LIBQRENCODE_FOUND)
+endif ()
 
 if (LIBZINT_FOUND)
   message (STATUS "libzint (optional)....... " ${LIBZINT_VERSION_STRING})
-else (LIBZINT_FOUND)
+else ()
   message (STATUS "libzint (optional)....... No.")
-endif (LIBZINT_FOUND)
+endif ()
 
 if (MSVC)
    message (STATUS "MSVC Qt location ........ " ${QT_BASE_DIR})
-endif (MSVC)
+endif ()
 
 if (MINGW)
    message (STATUS "MinGW location .......... " ${MINGW_BASE_DIR})
    message (STATUS "MinGW Qt location ....... " ${QT_BASE_DIR})
-endif (MINGW)
+endif ()
 
 message (STATUS "")
-
-#
-# Uncomment to print all CMake variables
-#
-# get_cmake_property(_variableNames VARIABLES)
-# foreach (_variableName ${_variableNames})
-#   message(STATUS "${_variableName}=${${_variableName}}")
-# endforeach()
-  

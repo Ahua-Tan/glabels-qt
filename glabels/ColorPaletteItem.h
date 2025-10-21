@@ -25,7 +25,6 @@
 #include <QColor>
 #include <QWidget>
 
-
 namespace glabels
 {
 
@@ -67,7 +66,7 @@ namespace glabels
 		/////////////////////////////////
 	protected:
 		void paintEvent( QPaintEvent* event ) override;
-		void enterEvent( QEnterEvent* event ) override;
+                void enterEvent( QEvent* event ) override;
 		void leaveEvent( QEvent* event ) override;
 		void mousePressEvent( QMouseEvent* event ) override;
 

@@ -23,7 +23,11 @@ set (merge_qobject_headers
   Merge.h
 )
 
-qt6_wrap_cpp (merge_moc_sources ${merge_qobject_headers})
+if(QT_VERSION_MAJOR EQUAL 6)
+    qt6_wrap_cpp(merge_moc_sources ${merge_qobject_headers})
+else()
+    qt5_wrap_cpp(merge_moc_sources ${merge_qobject_headers})
+endif()
 
 #=====================================
 # Target
@@ -43,5 +47,5 @@ target_include_directories (Merge
 )
 
 target_link_libraries (Merge
-  Qt6::Core
+  Qt${QT_VERSION_MAJOR}::Core
 )

@@ -47,16 +47,16 @@ namespace glabels
 		//
 		namespace
 		{
-			const QColor fillColor  = QColor( 224, 224, 224, 255 );
-			const QColor labelColor = QColor( 102, 102, 102, 255 );
-			const Distance pad = Distance::pt(2);
-		}
+                        const QColor   fillColor  = QColor( 224, 224, 224, 255 );
+                        const QColor   labelColor = QColor( 102, 102, 102, 255 );
+                        const Distance pad        = Distance::pt( 2 );
+                } // namespace
 
 
 		///
 		/// Constructor
 		///
-		ModelImageObject::ModelImageObject() : mImage(nullptr), mSvgRenderer(nullptr)
+                ModelImageObject::ModelImageObject() : mImage( nullptr ), mSvgRenderer( nullptr )
 		{
 			mOutline = new Outline( this );
 
@@ -81,21 +81,29 @@ namespace glabels
 		///
 		/// Constructor
 		///
-		ModelImageObject::ModelImageObject( const Distance&  x0,
-		                                    const Distance&  y0,
-		                                    const Distance&  w,
-		                                    const Distance&  h,
-		                                    bool             lockAspectRatio,
-		                                    const TextNode&  filenameNode,
+                ModelImageObject::ModelImageObject( const Distance&   x0,
+                                                    const Distance&   y0,
+                                                    const Distance&   w,
+                                                    const Distance&   h,
+                                                    bool              lockAspectRatio,
+                                                    const TextNode&   filenameNode,
 		                                    const QTransform& matrix,
-		                                    bool             shadowState,
-		                                    const Distance&  shadowX,
-		                                    const Distance&  shadowY,
-		                                    double           shadowOpacity,
-		                                    const ColorNode& shadowColorNode )
-		: ModelObject( x0, y0, w, h, lockAspectRatio,
-		               matrix,
-		               shadowState, shadowX, shadowY, shadowOpacity, shadowColorNode )
+                                                    bool              shadowState,
+                                                    const Distance&   shadowX,
+                                                    const Distance&   shadowY,
+                                                    double            shadowOpacity,
+                                                    const ColorNode&  shadowColorNode )
+                        : ModelObject( x0,
+                                       y0,
+                                       w,
+                                       h,
+                                       lockAspectRatio,
+                                       matrix,
+                                       shadowState,
+                                       shadowX,
+                                       shadowY,
+                                       shadowOpacity,
+                                       shadowColorNode )
 		{
 			mOutline = new Outline( this );
 
@@ -115,32 +123,40 @@ namespace glabels
 
 			mFilenameNode = filenameNode;
 
-			mImage = nullptr;
+                        mImage       = nullptr;
 			mSvgRenderer = nullptr;
 
 			loadImage();
 		}
 
-	
+
 		///
 		/// Constructor
 		///
-		ModelImageObject::ModelImageObject( const Distance&  x0,
-		                                    const Distance&  y0,
-		                                    const Distance&  w,
-		                                    const Distance&  h,
-		                                    bool             lockAspectRatio,
-		                                    const QString&   filename,
-		                                    const QImage&    image,
+                ModelImageObject::ModelImageObject( const Distance&   x0,
+                                                    const Distance&   y0,
+                                                    const Distance&   w,
+                                                    const Distance&   h,
+                                                    bool              lockAspectRatio,
+                                                    const QString&    filename,
+                                                    const QImage&     image,
 		                                    const QTransform& matrix,
-		                                    bool             shadowState,
-		                                    const Distance&  shadowX,
-		                                    const Distance&  shadowY,
-		                                    double           shadowOpacity,
-		                                    const ColorNode& shadowColorNode )
-		: ModelObject( x0, y0, w, h, lockAspectRatio,
-		               matrix,
-		               shadowState, shadowX, shadowY, shadowOpacity, shadowColorNode )
+                                                    bool              shadowState,
+                                                    const Distance&   shadowX,
+                                                    const Distance&   shadowY,
+                                                    double            shadowOpacity,
+                                                    const ColorNode&  shadowColorNode )
+                        : ModelObject( x0,
+                                       y0,
+                                       w,
+                                       h,
+                                       lockAspectRatio,
+                                       matrix,
+                                       shadowState,
+                                       shadowX,
+                                       shadowY,
+                                       shadowOpacity,
+                                       shadowColorNode )
 		{
 			mOutline = new Outline( this );
 
@@ -158,9 +174,9 @@ namespace glabels
 				smDefaultImage = new QImage( ":images/checkerboard.png" );
 			}
 
-			mImage = new QImage(image);
+                        mImage        = new QImage( image );
 			mFilenameNode = TextNode( false, filename );
-			mSvgRenderer = nullptr;
+                        mSvgRenderer  = nullptr;
 		}
 
 
@@ -180,9 +196,17 @@ namespace glabels
 		                                    const Distance&   shadowY,
 		                                    double            shadowOpacity,
 		                                    const ColorNode&  shadowColorNode )
-		: ModelObject( x0, y0, w, h, lockAspectRatio,
-		               matrix,
-		               shadowState, shadowX, shadowY, shadowOpacity, shadowColorNode )
+                        : ModelObject( x0,
+                                       y0,
+                                       w,
+                                       h,
+                                       lockAspectRatio,
+                                       matrix,
+                                       shadowState,
+                                       shadowX,
+                                       shadowY,
+                                       shadowOpacity,
+                                       shadowColorNode )
 		{
 			mOutline = new Outline( this );
 
@@ -200,17 +224,17 @@ namespace glabels
 				smDefaultImage = new QImage( ":images/checkerboard.png" );
 			}
 
-			mSvg = svg;
-			mSvgRenderer = new QSvgRenderer( mSvg );
+                        mSvg          = svg;
+                        mSvgRenderer  = new QSvgRenderer( mSvg );
 			mFilenameNode = TextNode( false, filename );
-			mImage = nullptr;
+                        mImage        = nullptr;
 		}
 
 
 		///
 		/// Copy constructor
 		///
-		ModelImageObject::ModelImageObject( const ModelImageObject* object ) : ModelObject(object)
+                ModelImageObject::ModelImageObject( const ModelImageObject* object ) : ModelObject( object )
 		{
 			mFilenameNode = object->mFilenameNode;
 			if ( object->mImage )
@@ -240,7 +264,7 @@ namespace glabels
 		{
 			delete mOutline;
 
-			foreach( Handle* handle, mHandles )
+                        foreach ( Handle* handle, mHandles )
 			{
 				delete handle;
 			}
@@ -284,7 +308,7 @@ namespace glabels
 			{
 				mFilenameNode = value;
 				loadImage();
-		
+
 				emit changed();
 			}
 		}
@@ -317,14 +341,20 @@ namespace glabels
 					mSvgRenderer = nullptr;
 				}
 
-				mImage = new QImage(value);
-				quint16 cs = qChecksum( QByteArray( (const char*)mImage->constBits(), mImage->sizeInBytes() ) );
-				mFilenameNode = TextNode( false, QString("%image_%1%").arg( cs ) );
+                                mImage = new QImage( value );
+#if QT_VERSION >= QT_VERSION_CHECK( 6, 0, 0 )
+                                quint16 cs = qChecksum(
+                                        QByteArrayView( mImage->constBits(), mImage->sizeInBytes() ) );
+#else
+                                quint16 cs = qChecksum( reinterpret_cast<const char*>( mImage->constBits() ),
+                                                        static_cast<uint>( mImage->sizeInBytes() ) );
+#endif
+                                mFilenameNode = TextNode( false, QString( "%image_%1%" ).arg( cs ) );
 
 				emit changed();
 			}
 		}
-		
+
 
 		///
 		/// Image Property Setter
@@ -344,13 +374,13 @@ namespace glabels
 					mSvgRenderer = nullptr;
 				}
 
-				mImage = new QImage(value);
+                                mImage        = new QImage( value );
 				mFilenameNode = TextNode( false, name );
 
 				emit changed();
 			}
 		}
-		
+
 
 		///
 		/// Image svg Property Getter
@@ -379,21 +409,21 @@ namespace glabels
 					mSvgRenderer = nullptr;
 				}
 
-				mSvg = value;
-				mSvgRenderer = new QSvgRenderer( mSvg );
+                                mSvg          = value;
+                                mSvgRenderer  = new QSvgRenderer( mSvg );
 				mFilenameNode = TextNode( false, name );
 
 				emit changed();
 			}
 		}
-		
+
 
 		///
 		/// naturalSize Property Getter (assumes 72 DPI, i.e. 1pixel == 1pt)
 		///
 		Size ModelImageObject::naturalSize() const
 		{
-			Size size( Distance::pt(72), Distance::pt(72) );
+                        Size size( Distance::pt( 72 ), Distance::pt( 72 ) );
 
 			if ( mImage )
 			{
@@ -421,11 +451,11 @@ namespace glabels
 		                                   Variables*     variables ) const
 		{
 			QRectF destRect( 0, 0, mW.pt(), mH.pt() );
-	
+
 			QColor shadowColor = mShadowColorNode.color( record, variables );
 			shadowColor.setAlphaF( mShadowOpacity );
 
-			if ( mImage && mImage->hasAlphaChannel() && (mImage->depth() == 32) )
+                        if ( mImage && mImage->hasAlphaChannel() && ( mImage->depth() == 32 ) )
 			{
 				QImage* shadowImage = createShadowImage( *mImage, shadowColor );
 				painter->drawImage( destRect, *shadowImage );
@@ -440,15 +470,16 @@ namespace glabels
 			}
 			else
 			{
-				QString filename = mFilenameNode.text( record, variables ).trimmed();
-				QImage* image;
+                                QString       filename = mFilenameNode.text( record, variables ).trimmed();
+                                QImage*       image;
 				QSvgRenderer* svgRenderer;
-				QByteArray svg;
+                                QByteArray    svg;
 				if ( readImageFile( filename, image, svgRenderer, svg ) )
 				{
-					if ( image && image->hasAlphaChannel() && (image->depth() == 32) )
+                                        if ( image && image->hasAlphaChannel() && ( image->depth() == 32 ) )
 					{
-						QImage* shadowImage = createShadowImage( *image, shadowColor );
+                                                QImage* shadowImage =
+                                                        createShadowImage( *image, shadowColor );
 						painter->drawImage( destRect, *shadowImage );
 						delete shadowImage;
 					}
@@ -471,7 +502,7 @@ namespace glabels
 			}
 		}
 
-	
+
 		///
 		/// Draw object itself
 		///
@@ -481,8 +512,8 @@ namespace glabels
 		                                   Variables*     variables ) const
 		{
 			QRectF destRect( 0, 0, mW.pt(), mH.pt() );
-	
-			if ( inEditor && (mFilenameNode.isField() || (!mImage && !mSvgRenderer) ) )
+
+                        if ( inEditor && ( mFilenameNode.isField() || ( !mImage && !mSvgRenderer ) ) )
 			{
 				//
 				// Render default place holder image
@@ -495,9 +526,9 @@ namespace glabels
 				//
 				// Print label on top of place holder image, if we have room
 				//
-				if ( (mW > 6*pad) && (mH > 4*pad) )
+                                if ( ( mW > 6 * pad ) && ( mH > 4 * pad ) )
 				{
-					QString labelText = tr("No image");
+                                        QString labelText = tr( "No image" );
 					if ( mFilenameNode.isField() )
 					{
 						labelText = QString( "${%1}" ).arg( mFilenameNode.data() );
@@ -508,11 +539,11 @@ namespace glabels
 					font.setPointSizeF( 6 );
 
 					QFontMetricsF fm( font );
-					QRectF textRect = fm.boundingRect( labelText );
+                                        QRectF        textRect = fm.boundingRect( labelText );
 
-					double wPts = (mW - 2*pad).pt();
-					double hPts = (mH - 2*pad).pt();
-					if ( (wPts < textRect.width()) || (hPts < textRect.height()) )
+                                        double wPts = ( mW - 2 * pad ).pt();
+                                        double hPts = ( mH - 2 * pad ).pt();
+                                        if ( ( wPts < textRect.width() ) || ( hPts < textRect.height() ) )
 					{
 						double scaleX = wPts / textRect.width();
 						double scaleY = hPts / textRect.height();
@@ -520,13 +551,13 @@ namespace glabels
 					}
 
 					// Render hole for text (font size may have changed above)
-					fm = QFontMetricsF( font );
+                                        fm       = QFontMetricsF( font );
 					textRect = fm.boundingRect( labelText );
-		
-					QRectF holeRect( (mW.pt() - textRect.width())/2 - pad.pt(),
-					                 (mH.pt() - textRect.height())/2 - pad.pt(),
-					                 textRect.width() + 2*pad.pt(),
-					                 textRect.height() + 2*pad.pt() );
+
+                                        QRectF holeRect( ( mW.pt() - textRect.width() ) / 2 - pad.pt(),
+                                                         ( mH.pt() - textRect.height() ) / 2 - pad.pt(),
+                                                         textRect.width() + 2 * pad.pt(),
+                                                         textRect.height() + 2 * pad.pt() );
 
 					painter->setPen( Qt::NoPen );
 					painter->setBrush( QBrush( fillColor ) );
@@ -550,10 +581,10 @@ namespace glabels
 			}
 			else if ( mFilenameNode.isField() )
 			{
-				QString filename = mFilenameNode.text( record, variables ).trimmed();
-				QImage* image;
+                                QString       filename = mFilenameNode.text( record, variables ).trimmed();
+                                QImage*       image;
 				QSvgRenderer* svgRenderer;
-				QByteArray svg;
+                                QByteArray    svg;
 				if ( readImageFile( filename, image, svgRenderer, svg ) )
 				{
 					if ( image )
@@ -616,18 +647,18 @@ namespace glabels
 						// Adjust size based on aspect ratio of image
 						double imageW = mImage->width();
 						double imageH = mImage->height();
-						aspectRatio = imageW ? imageH / imageW : 0;
+                                                aspectRatio   = imageW ? imageH / imageW : 0;
 					}
 
 					if ( aspectRatio )
 					{
-						if ( mH > mW*aspectRatio )
+                                                if ( mH > mW * aspectRatio )
 						{
-							mH = mW*aspectRatio;
+                                                        mH = mW * aspectRatio;
 						}
 						else
 						{
-							mW = mH/aspectRatio;
+                                                        mW = mH / aspectRatio;
 						}
 					}
 				}
@@ -643,7 +674,7 @@ namespace glabels
 		                                      QSvgRenderer*& svgRenderer,
 		                                      QByteArray&    svg ) const
 		{
-			image = nullptr;
+                        image       = nullptr;
 			svgRenderer = nullptr;
 			svg.clear();
 
@@ -654,8 +685,10 @@ namespace glabels
 				{
 					// Look for image file relative to project file 1st then CWD 2nd
 					auto* model = dynamic_cast<Model*>( parent() );
-					QDir::setSearchPaths( "images", {model ? model->dirPath() : "", QDir::currentPath()} );
-					fileInfo.setFile( QString("images:") + fileName );
+                                        QDir::setSearchPaths(
+                                                "images",
+                                                { model ? model->dirPath() : "", QDir::currentPath() } );
+                                        fileInfo.setFile( QString( "images:" ) + fileName );
 				}
 
 				if ( fileInfo.isReadable() )
@@ -695,27 +728,26 @@ namespace glabels
 		///
 		/// Create shadow image
 		///
-		QImage* ModelImageObject::createShadowImage( const QImage& image,
-		                                             const QColor& color ) const
+                QImage* ModelImageObject::createShadowImage( const QImage& image, const QColor& color ) const
 		{
 			int r = color.red();
 			int g = color.green();
 			int b = color.blue();
 			int a = color.alpha();
-		
+
 			auto* shadow = new QImage( image );
 			for ( int iy = 0; iy < shadow->height(); iy++ )
 			{
 				auto* scanLine = (QRgb*)shadow->scanLine( iy );
-		
+
 				for ( int ix = 0; ix < shadow->width(); ix++ )
 				{
-					scanLine[ix] = qRgba( r, g, b, (a*qAlpha(scanLine[ix]))/255 );
+                                        scanLine[ix] = qRgba( r, g, b, ( a * qAlpha( scanLine[ix] ) ) / 255 );
 				}
 			}
 
 			return shadow;
 		}
 
-	}
-}
+        } // namespace model
+} // namespace glabels
