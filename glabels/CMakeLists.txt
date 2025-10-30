@@ -165,8 +165,10 @@ install (FILES icons/mimetypes/24x24/x-glabels-project.svg    DESTINATION share/
 # Windows Runtime
 #
 if (WIN32)
-
     find_program (WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${QT_BIN_DIR}")
+    message(STATUS "Qt Bin Directory: ${QT_BIN_DIR}")
+    message(STATUS "windeployqt Executable: ${WINDEPLOYQT_EXECUTABLE}")
+    set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE PATH "Install path" FORCE)
 
     #
     # Visual Studio toolchain
@@ -182,13 +184,15 @@ if (WIN32)
                     \"$<TARGET_FILE:glabels-qt>\"
         )
 
+      message(STATUS "CMAKE_CURRENT_BINARY_DIR: ${CMAKE_CURRENT_BINARY_DIR}")
       # Install files staged by windeployqt
-        install (DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/ DESTINATION bin
-                 FILES_MATCHING PATTERN *.dll PATTERN *.qm)
+        install (DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/ DESTINATION bin
+                 FILES_MATCHING PATTERN *.dll PATTERN *.qm
+                 PATTERN "CMakeFiles" EXCLUDE)
 
         # Install necessary system libraries
         set (CMAKE_INSTALL_UCRT_LIBRARIES TRUE)
-        include (InstallRequiredSystemLibraries)
+        # include (InstallRequiredSystemLibraries)
     endif (MSVC)
 
     #
@@ -207,8 +211,9 @@ if (WIN32)
         )
 
         # Install files staged by windeployqt
-        install (DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/ DESTINATION bin
-                 FILES_MATCHING PATTERN *.dll PATTERN *.qm)
+        install (DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/ DESTINATION bin
+                 FILES_MATCHING PATTERN *.dll PATTERN *.qm
+                 PATTERN "CMakeFiles" EXCLUDE)
 
         # Install necessary system libraries
         install (FILES
