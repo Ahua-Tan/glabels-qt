@@ -192,7 +192,7 @@ if (WIN32)
 
         # Install necessary system libraries
         set (CMAKE_INSTALL_UCRT_LIBRARIES TRUE)
-        # include (InstallRequiredSystemLibraries)
+        include (InstallRequiredSystemLibraries)
     endif (MSVC)
 
     #
