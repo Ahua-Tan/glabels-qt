@@ -9,6 +9,7 @@ project (glabels-qt VERSION "3.99.0")
 # Path for locally defined cmake modules
 #
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 
 #=======================================
 # Version Information
